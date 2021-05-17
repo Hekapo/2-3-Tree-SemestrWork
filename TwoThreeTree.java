@@ -1,11 +1,10 @@
 package TwoThreeSemestrWork;
 
 
-import java.util.LinkedList;
-import java.util.Queue;
-
 public class TwoThreeTree {
-    static int iterations = 0;
+    static int iterationsInsert = 0;
+    static int iterationsSearch = 0;
+    static int iterationsDelete = 0;
 
     // Private member variables of the class
     private int size;
@@ -108,7 +107,7 @@ public class TwoThreeTree {
             updateTree(treeRoot);   // Update the new node
             root = treeRoot;        // Assign root to this node
         } // if else ends here
-        iterations++;
+        iterationsInsert++;
     } // insertKey() ends here
 
     // Insert: Returns an array of nodes(max 2 nodes)
@@ -119,15 +118,15 @@ public class TwoThreeTree {
         Node[] array = new Node[2];     // [0] old Node, [1] = new Node
 
         // This array of node stores the result after the recursive insert has returned
-        Node[] catchArray = new Node[2];
+        Node[] catchArray;
 
         TreeNode t = null;  // Initialize t to null
 
         // If the node is a TreeNode
         if (n instanceof TreeNode) {
             t = (TreeNode) n;
+            iterationsInsert++;
         }
-
         // If the root is null, this means it is the first node
         if (root == null && !first) {
             first = true;   // Switch to make this if false for next recursive call
@@ -135,6 +134,8 @@ public class TwoThreeTree {
             // Create a new TreeNode
             t = new TreeNode();
             // Call insert with the given value
+
+            iterationsInsert++;
             t.children[0] = insert(key, t.children[0])[0];
             updateTree(t);  // Update the tree
 
@@ -142,7 +143,6 @@ public class TwoThreeTree {
             // Make first element in the array store the reference of this TreeNode
             array[0] = t;
             array[1] = null;    // Make second element null
-            iterations++;
 
         } // If the node on which insert was called is a treeNode and
         // stores references to TreeNodes
@@ -150,6 +150,7 @@ public class TwoThreeTree {
             // If the key to be inserted is less than the first key
             if (key < t.keys[0]) {
                 // Recursively call insert on the left children node
+                iterationsInsert++;
                 catchArray = insert(key, t.children[0]);
                 // Store the reference returned by the call
                 t.children[0] = catchArray[0];
@@ -179,18 +180,21 @@ public class TwoThreeTree {
                         array[0] = t;
                         array[1] = newNode;
                     }
+                    iterationsInsert++;
                 } else {
                     // If there was no split simply update the tree and
                     // pass the reference up the tree
                     updateTree(t);
                     array[0] = t;
                     array[1] = null;
+                    iterationsInsert++;
                 } // if else for split ends here
             } // If for key < t.keys[0] ends here
             // If the key to be inserted is less than the first and greater than the second
             // or second is null
             else if (key >= t.keys[0] && (t.children[2] == null || key < t.keys[1])) {
                 // Recursively call insert on the middle children node
+                iterationsInsert++;
                 catchArray = insert(key, t.children[1]);
                 // Store the reference returned by the call
                 t.children[1] = catchArray[0];
@@ -229,6 +233,7 @@ public class TwoThreeTree {
             // If the key to be inserted is greater than second key
             else if (key >= t.keys[1]) {
                 // Recursively call insert on the right children node
+                iterationsInsert++;
                 catchArray = insert(key, t.children[2]);
                 // Store the reference returned by the call
                 t.children[2] = catchArray[0];
@@ -256,7 +261,6 @@ public class TwoThreeTree {
                     array[1] = null;
                 } // if else for split ends here
             } // If for key >= t.keys[1] ends here
-            iterations++;
         } // If the node on which insert was called is a treeNode and
         // stores references to LeafNodes
         else if (t != null && t.children[0] instanceof LeafNode) {
@@ -371,18 +375,18 @@ public class TwoThreeTree {
             } // outer else if ends here
             // If we have made it till here we have successfully inserted the value
             successfulInsertion = true;
-            iterations++;
         } else if (n == null) {
             // If the node was null it means there is no leafNode
             // Pass the reference to the new leafNode back
             successfulInsertion = true;
             array[0] = new LeafNode(key);
             array[1] = null;
-            iterations++;
+            iterationsInsert++;
             return array;
         }
-
         // Return the array
+        iterationsInsert++;
+
         return array;
     } // recursive insert ends here
 
@@ -406,6 +410,7 @@ public class TwoThreeTree {
             // If the given key to be deleted is less than the first key
             if (key < t.keys[0]) {
                 // Perform deletion on first child with the same key
+                iterationsDelete++;
                 t.children[0] = remove(key, t.children[0]);
 
                 // If after deletion there is a degree 1 node in the tree
@@ -497,6 +502,7 @@ public class TwoThreeTree {
             } // If the given key to be deleted is in between first and second key
             else if (key >= t.keys[0] && (t.children[2] == null || key < t.keys[1])) {
                 // Perform deletion on second child with the same key
+                iterationsDelete++;
                 t.children[1] = remove(key, t.children[1]);
 
                 // If after deletion there is a degree 1 node in the tree
@@ -627,6 +633,7 @@ public class TwoThreeTree {
             } // If the given key to be deleted is greater than the second key
             else if (key >= t.keys[1]) {
                 // Perform deletion on third child with the same key
+                iterationsDelete++;
                 t.children[2] = remove(key, t.children[2]);
 
                 // If after deletion there is a degree 1 node in the tree
@@ -738,6 +745,7 @@ public class TwoThreeTree {
             // The deletion is successful
             successfulDeletion = true;
         } // outer if else ends here
+        iterationsDelete++;
         return t;
     } // remove() ends here
 
@@ -765,7 +773,9 @@ public class TwoThreeTree {
                 // Make both keys equal to 0
                 t.keys[1] = t.keys[0] = 0;
             } // if else ends here
-        } // outer if ends here
+        }// outer if ends here
+        iterationsInsert++;
+        iterationsDelete++;
     } // updateTree() ends here
 
     // This method returns the value for the keys of the TreeNode
@@ -795,18 +805,24 @@ public class TwoThreeTree {
                     case LEFT:
                         // Go in the middle node and then keep going towards
                         // 1st children using recursive calls
+                        iterationsInsert++;
+                        iterationsDelete++;
                         key = getValueForKey(t.children[1], Nodes.DUMMY);
                         break;
                     // If it is the right key
                     case RIGHT:
                         // Go in the right node and then keep going towards
                         // 1st children using recursive calls
+                        iterationsInsert++;
+                        iterationsDelete++;
                         key = getValueForKey(t.children[2], Nodes.DUMMY);
                         break;
                     // This case executes after we have determined which node
                     // we want to go for
                     case DUMMY:
                         // Way to 1st children of the treeNode
+                        iterationsInsert++;
+                        iterationsDelete++;
                         key = getValueForKey(t.children[0], Nodes.DUMMY);
                         break;
                     default:
@@ -816,6 +832,8 @@ public class TwoThreeTree {
         } // outer if ends here
 
         // Return value for the key
+        iterationsInsert++;
+        iterationsDelete++;
         return key;
     } // getValueForKey() ends here
 
@@ -838,26 +856,38 @@ public class TwoThreeTree {
             // If it has a degree of 1
             if (t.degree == 1) {
                 // Continue search in left node
+                iterationsSearch++;
+                iterationsDelete++;
                 found = search(key, t.children[0]);
             } // If it has a degree of 2 and the value of key is less than 1st key
             else if (t.degree == 2 && key < t.keys[0]) {
                 // Continue search in left node
+                iterationsSearch++;
+                iterationsDelete++;
                 found = search(key, t.children[0]);
             } // If it has a degree of 2 and the value of key is greater than 1st key
             else if (t.degree == 2 && key >= t.keys[0]) {
                 // Continue search in middle node
+                iterationsSearch++;
+                iterationsDelete++;
                 found = search(key, t.children[1]);
             } // If it has a degree of 3 and the value to be searched for is less than 1st key
             else if (t.degree == 3 && key < t.keys[0]) {
                 // Continue search in left node
+                iterationsSearch++;
+                iterationsDelete++;
                 found = search(key, t.children[0]);
             } // If it has a degree of 3 and the value to be searched for is in between 1st and 2nd key
             else if (t.degree == 3 && key >= t.keys[0] && key < t.keys[1]) {
                 // Continue search in middle node
+                iterationsSearch++;
+                iterationsDelete++;
                 found = search(key, t.children[1]);
             } // If it has a degree of 3 and the value to be searched for is greater than 2nd key
             else if (t.degree == 3 && key >= t.keys[1]) {
                 // Continue search in right node
+                iterationsSearch++;
+                iterationsDelete++;
                 found = search(key, t.children[2]);
             } // inner if else ends here
         } // If it is a leaf node and value matches the one we are searching
@@ -865,153 +895,28 @@ public class TwoThreeTree {
             return true;
         } // outer if else ends here
 
+        iterationsSearch++;
+        iterationsDelete++;
         return found;
     } // search() ends here
 
-    // This method prints the keys stored in the leafNodes in order
-    private void keyOrderList(Node n) {
-
-        // Determine the type of node
-        TreeNode t = null;
-        LeafNode l = null;
-        if (n instanceof TreeNode) {
-            t = (TreeNode) n;
-        } else {
-            l = (LeafNode) n;
-        }
-
-        // If it is a TreeNode
-        if (t != null) {
-            // If the first child is not null
-            if (t.children[0] != null) {
-                // Continue recursive call on 1st child
-                keyOrderList(t.children[0]);
-            }
-
-            // If the second child is not null
-            if (t.children[1] != null) {
-                // Continue recursive call on 2nd child
-                keyOrderList(t.children[1]);
-            }
-
-            // If the third child is not null
-            if (t.children[2] != null) {
-                // Continue recursive call on 3rd child
-                keyOrderList(t.children[2]);
-            }
-        } // If it is LeafNode
-        else if (l != null) {
-            // Just print the given key
-            System.out.print(l.key + " ");
-        } // outer if else ends here
-    } // keyOrderList() ends here
-
-    // This method just prints the keys on each level
-    private void bfsList(Node n) {
-        // Make two new queues to store each alternate levels in the queue
-        Queue<Node> queueOne = new LinkedList<>();
-        Queue<Node> queueTwo = new LinkedList<>();
-
-        // If the first node is null quit else continue
-        if (n == null) {
-            return;
-        }
-
-        // Add the first node to the first queue
-        queueOne.add(n);
-
-        // Just declare two Node variables to hold the nodes
-        Node first;
-        TreeNode t = null;
-
-        // Loop until both the queues are non-empty
-        while (!queueOne.isEmpty() || !queueTwo.isEmpty()) {
-
-            // If the first queue is not empty
-            while (!queueOne.isEmpty()) {
-                // Take the first element from the queue
-                first = queueOne.poll();
-                // If it is a tree node print the node
-                if (first instanceof TreeNode) {
-                    t = (TreeNode) first;
-                    t.print();
-                }
-
-                // Now add all the children on the next level to second queue
-                if (t.children[0] != null && !(t.children[0] instanceof LeafNode)) {
-                    queueTwo.add(t.children[0]);
-                }
-                if (t.children[1] != null && !(t.children[1] instanceof LeafNode)) {
-                    queueTwo.add(t.children[1]);
-                }
-                if (t.children[2] != null && !(t.children[2] instanceof LeafNode)) {
-                    queueTwo.add(t.children[2]);
-                }
-
-            } // first inner loop ends here
-            // Leave a blank line after printing a level
-            if (!queueOne.isEmpty() || !queueTwo.isEmpty()) {
-                System.out.println();
-            }
-
-            // If the second queue is not empty
-            while (!queueTwo.isEmpty()) {
-                // Take the first element from the queue
-                first = queueTwo.poll();
-
-                // If it is a tree node print the node
-                if (first instanceof TreeNode) {
-                    t = (TreeNode) first;
-                    t.print();
-                }
-
-                // Now add all the children on the next level to first queue
-                if (t.children[0] != null && !(t.children[0] instanceof LeafNode)) {
-                    queueOne.add(t.children[0]);
-                }
-                if (t.children[1] != null && !(t.children[1] instanceof LeafNode)) {
-                    queueOne.add(t.children[1]);
-                }
-                if (t.children[2] != null && !(t.children[2] instanceof LeafNode)) {
-                    queueOne.add(t.children[2]);
-                }
-
-            } // second inner loop ends here
-            // Leave a blank line after printing a level
-            if (!queueOne.isEmpty() || !queueTwo.isEmpty()) {
-                System.out.println();
-            }
-        } // outer loop ends here
-
-        // Print blank lines before and after printing the keys
-        System.out.println();
-        keyOrderList(root);
-        System.out.println();
-    } // bfsList() ends here
-
-    // This method determines the height of the tree
-    private int height(Node n) {
-
-        // Determine the type of the node
-        TreeNode t = null;
-        LeafNode l = null;
-        if (n instanceof TreeNode) {
-            t = (TreeNode) n;
-        } else {
-            l = (LeafNode) n;
-        }
-
-        // If the node is a Tree node and is not null
-        if (t != null) {
-            // Calculate height of left child and add 1
-            return 1 + height(t.children[0]);
-        }
-
-        return 0;
-    } // height() ends here
-
     // This is a public method to call insert
-    public boolean insert(int key) {
+    public boolean Insert(int key) {
+        iterationsInsert = 0;
+        return insert(key);
+    }
+
+    public boolean Remove(int key) {
+        iterationsDelete = 0;
+        return remove(key);
+    }
+
+    public boolean Search(int key) {
+        iterationsSearch = 0;
+        return search(key);
+    }
+
+    private boolean insert(int key) {
         // Let insert to false
         boolean insert = false;
         // make all the variables related to insert have their default values
@@ -1030,6 +935,7 @@ public class TwoThreeTree {
             insert = true;
             successfulInsertion = false;
         }
+        iterationsInsert++;
         return insert;
     } // insert() ends here
 
@@ -1066,34 +972,8 @@ public class TwoThreeTree {
             successfulDeletion = false;
         } // if ends here
 
+        iterationsDelete++;
         return delete;
     } // remove() ends here
-
-    // This is a public method to call keyOrderList
-    public void keyOrderList() {
-        // Format the output and call the method
-        System.out.println("Keys");
-        keyOrderList(root);
-        System.out.println();
-    } // keyOrderList() ends here
-
-    // This is a public method to call bfsList
-    public void bfsList() {
-        // Format the output and call the method
-        System.out.println("Tree");
-        bfsList(root);
-    } // bfsList() ends here
-
-    // This method returns the number of the keys stored in the tree
-    public int numberOfNodes() {
-        // Return the number of values present in the tree
-        return size;
-    } // numberOfNodes() ends here
-
-    // This is a public method to call height
-    public int height() {
-        // Return the height of the tree
-        return height(root);
-    } // height() ends here
 
 } // TwoThreeTree class definition ends here
